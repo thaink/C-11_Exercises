@@ -13,10 +13,9 @@ using std::swap;
 /*
  * implementation of vector_base
  */
-
 //template<class T, class A>
 //vector_base<T,A>::vector_base(vector_base<T,A>&& a)
-vector_base::vector_base(vector_base&& a)
+vector::vector_base::vector_base(vector_base&& a)
     : alloc(a.alloc),
       elem(a.elem),
       space(a.space),
@@ -27,7 +26,7 @@ vector_base::vector_base(vector_base&& a)
 
 //template<class T, class A>
 //vector_base<T,A>& vector_base<T,A>::operator=(vector_base<T,A>&& a)
-vector_base& vector_base::operator=(vector_base&& a)
+vector::vector_base& vector::vector_base::operator=(vector_base&& a)
 {
     swap(*this, a);
     return *this;

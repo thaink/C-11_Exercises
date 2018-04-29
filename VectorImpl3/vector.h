@@ -10,26 +10,6 @@
 #include <memory>
 
 namespace Estd {
-    //template <class T, class A = std::allocator<T>>
-    struct vector_base{
-        using T = int;
-        using A = std::allocator<int>;
-        using value_type = T;
-        using size_type = unsigned int;
-        A alloc;          //allocator
-        value_type* elem; //start of allocation
-        value_type* space;//end of element sequence, start of space allocated for posible expansion
-        value_type* last; //end of allocated space
-
-        vector_base(const A& a, size_type n)
-            :alloc{a}, elem{alloc.allocate(n)}, space{elem}, last{elem+n} {}
-        ~vector_base(){alloc.deallocate(elem, last-elem);}
-
-        vector_base(const vector_base&) = delete;
-        vector_base& operator=(const vector_base&) = delete;
-        vector_base(vector_base&&);
-        vector_base& operator=(vector_base&&);
-    };//vector_base
 
     /*
      * Vector implementation. this a simplified version
@@ -78,6 +58,26 @@ namespace Estd {
         /*
          * This class are meant to manage the memory of vector
          */
+        //template <class T, class A = std::allocator<T>>
+        struct vector_base{
+            using T = int;
+            using A = std::allocator<int>;
+            using value_type = T;
+            using size_type = unsigned int;
+            A alloc;          //allocator
+            value_type* elem; //start of allocation
+            value_type* space;//end of element sequence, start of space allocated for posible expansion
+            value_type* last; //end of allocated space
+
+            vector_base(const A& a, size_type n)
+                :alloc{a}, elem{alloc.allocate(n)}, space{elem}, last{elem+n} {}
+            ~vector_base(){alloc.deallocate(elem, last-elem);}
+
+            vector_base(const vector_base&) = delete;
+            vector_base& operator=(const vector_base&) = delete;
+            vector_base(vector_base&&);
+            vector_base& operator=(vector_base&&);
+        };//vector_base
         vector_base vb;
 
         void destroy_elements();
