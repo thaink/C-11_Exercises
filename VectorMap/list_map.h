@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <iterator>
 #include <map>
+#include <cassert>
 
 namespace ktstd {
 
@@ -31,14 +32,12 @@ namespace ktstd {
      * original layer.
      */
 
-    using T             = std::string;
-    using Key           = std::string;
-    using internal_val  = typename std::pair<const Key,T>;
-    using Pointer       = internal_val*;
-    using Reference     = internal_val&;
-    using Compare       = std::less<Key>;
-    using Allocator     = std::allocator<std::pair<const Key, T>>;
-
+using T             = std::string;
+using Key           = std::string;
+using internal_val  = typename std::pair<const Key,T>;
+using Pointer       = internal_val*;
+using Reference     = internal_val&;
+using Compare       = std::less<Key>;
 
 
 
@@ -48,13 +47,15 @@ namespace ktstd {
         using value_type    = internal_val;
 
         //data
+        value_type value; //pair of Key/Value
         this_type* Prev;
         this_type* Next;
-        value_type value;
 
         list_map_base(const value_type val)
-            :value(val), Prev(nullptr), Next(nullptrs) {}
+            :value(val), Prev(nullptr), Next(nullptr) {}
     };
+
+using Allocator     = std::allocator<std::pair<const Key, list_map_base::this_type>>;
 
     //template <typename T, typename Pointer, typename Reference>
     struct list_map_iterator
@@ -124,7 +125,7 @@ namespace ktstd {
         // mNode.Next = Front
         // mNode.Prev = Back;
         node_type mNode;
-        map_type mMap;
+        map_type  mMap;
 
     public:
         list_map(const Allocator& allocator = Allocator());
@@ -301,7 +302,7 @@ namespace ktstd {
     //template<class Key, class T, class Compare, class Allocator>
     //list_map<Key, T, Compare, Allocator>::list_map(const Allocator& allocator)
     list_map::list_map(const Allocator& allocator)
-        :mMap(allocator)
+        :mNode(std::pair<std::string,std::string>()), mMap(allocator)
     {
         mNode.Next = &mNode;
         mNode.Prev = &mNode;
@@ -311,7 +312,7 @@ namespace ktstd {
     //template<class Key, class T, class Compare, class Allocator>
     //list_map<Key, T, Compare, Allocator>::list_map(const Compare& compare, const Allocator& allocator)
     list_map::list_map(const Compare& compare, const Allocator& allocator)
-        :mMap(compare, allocator)
+        :mNode(std::pair<std::string,std::string>()),mMap(compare, allocator)
     {
         mNode.Next = &mNode;
         mNode.Prev = &mNode;
@@ -455,19 +456,72 @@ namespace ktstd {
     bool list_map::push_front(const value_type& value)
     {
         node_type temp(value);
-        typename map_type::insert_return_type res = mMap.insert(temp);
+        auto res = mMap.emplace(value.first, temp);
         if (res.second) {
+            node_type* pnode = static_cast<node_type*> (&((*res.first).second));
 
+            pnode->Next = mNode.Next;
+            pnode->Prev = &mNode;
+
+            mNode.Next->Prev = pnode;
+            mNode.Next  = pnode;//careful with the order
+            return true;
         }
+        return false;
     }
 
-    bool list_map::push_back(const value_type& value);
+    bool list_map::push_back(const value_type& value)
+    {
+        node_type temp(value);
+        auto res = mMap.emplace(value.first, temp);
+        if (res.second) {
+            node_type* pnode = static_cast<node_type*> (&((*res.first).second));
 
-    bool list_map::push_front(const key_type& key, const mapped_type& value);
-    bool list_map::push_back(const key_type& key, const mapped_type& value);
+            pnode->Next = &mNode;
+            pnode->Prev = mNode.Prev;
 
-    void list_map::pop_front();
-    void list_map::pop_back();
+            mNode.Prev->Next = pnode;
+            mNode.Prev  = pnode;
+            return true;
+        }
+        return false;
+    }
+
+    bool list_map::push_front(const key_type& key, const mapped_type& value)
+    {
+        return push_front(std::make_pair(key, value));
+    }
+
+    bool list_map::push_back(const key_type& key, const mapped_type& value)
+    {
+        return push_back(std::make_pair(key, value));
+    }
+
+    void list_map::pop_front()
+    {
+        if(&mNode == mNode.Next) return;
+
+        node_type* pnode = mNode.Next;
+        mNode.Next = pnode->Next;
+        pnode->Next->Prev = &mNode;
+        auto res = mMap.erase(pnode->value.first);
+        assert(res > 0);//TO_REMOVE
+
+    }
+
+    void list_map::pop_back()
+    {
+        if(&mNode == mNode.Prev) return;
+
+        node_type* pnode = mNode.Prev;
+        mNode.Prev = pnode->Prev;
+        pnode->Prev->Next = &mNode;
+        auto res = mMap.erase(pnode->value.first);
+        assert(res > 0);//TO_REMOVE
+    }
+
+    //For Map
+
 }
 
 #endif // KTSTD_LIST_MAP_H
