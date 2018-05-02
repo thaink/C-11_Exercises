@@ -1,9 +1,12 @@
 TEMPLATE = app
-CONFIG += console c++11
+CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
-SOURCES += main.cpp
+QMAKE_CXXFLAGS += -std=c++17
+
+SOURCES += main.cpp \
+    test_iterator.cpp
 
 HEADERS += \
     list_map.h
