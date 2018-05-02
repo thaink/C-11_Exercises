@@ -2,23 +2,35 @@
 
 using namespace std;
 
-template<typename T>
-T adder(T v) {
-  return v;
-}
+/**
+ * example of using sizeof... instead of define seperate function
+ */
 
-template<typename T, typename... Args>
-T adder(T first, Args... args) {
-  return first + adder(args...);
-}
+namespace folly {
+
+  template <typename T, typename... Ts>
+  size_t hash_combine(const T& t, const Ts&... ts) {
+    size_t seed = std::hash<T>()(t);
+    if (sizeof...(ts) == 0) {
+      return seed;
+    }
+    size_t remainder = hash_combine(ts...);   // not recursion!
+    return hash_128_to_64(seed, remainder);
+  }
+} //namespace
+
+// Simple example
+struct Obj {
+  int x;
+  string y;
+  float z;
+
+  size_t hash() const { return folly::hash_combine(x,y,z); }
+};
 
 int main()
 {
-    long sum = adder(1, 2, 3, 8, 7);
-
-    std::string s1 = "x", s2 = "aa", s3 = "bb", s4 = "yy";
-    std::string ssum = adder(s1, s2, s3, s4);
-
+    cout << "Hello World!" << endl;
     return 0;
 }
 
