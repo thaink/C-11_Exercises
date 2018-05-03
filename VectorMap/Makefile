@@ -109,7 +109,8 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/yacc.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
 		VectorMap.pro list_map.h \
-		array.h main.cpp \
+		array.h \
+		vector_map.h main.cpp \
 		test_list_map.cpp \
 		test_array.cpp
 QMAKE_TARGET  = VectorMap

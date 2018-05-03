@@ -11,5 +11,6 @@ SOURCES += main.cpp \
 
 HEADERS += \
     list_map.h \
-    array.h
+    array.h \
+    vector_map.h
 

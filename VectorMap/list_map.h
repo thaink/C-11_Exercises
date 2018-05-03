@@ -96,7 +96,7 @@ namespace ktstd {
 
     public:
         //basic types
-        using this_type                 = list_map;
+        using this_type                 = list_map<Key,T,Compare,Allocator>;
         using size_type                 = std::size_t;
         using key_type                  = Key;
         using mapped_type               = T;
