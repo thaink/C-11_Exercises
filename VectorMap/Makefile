@@ -48,10 +48,8 @@ OBJECTS_DIR   = ./
 
 ####### Files
 
-SOURCES       = main.cpp \
-		test_iterator.cpp 
-OBJECTS       = main.o \
-		test_iterator.o
+SOURCES       = main.cpp 
+OBJECTS       = main.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/unix.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/linux.conf \
@@ -106,8 +104,7 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exceptions.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/yacc.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
-		VectorMap.pro list_map.h main.cpp \
-		test_iterator.cpp
+		VectorMap.pro list_map.h main.cpp
 QMAKE_TARGET  = VectorMap
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = VectorMap
@@ -291,9 +288,6 @@ compiler_clean:
 
 main.o: main.cpp list_map.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
-
-test_iterator.o: test_iterator.cpp list_map.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o test_iterator.o test_iterator.cpp
 
 ####### Install
 

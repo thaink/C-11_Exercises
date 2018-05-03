@@ -5,8 +5,7 @@ CONFIG -= qt
 
 QMAKE_CXXFLAGS += -std=c++17
 
-SOURCES += main.cpp \
-    test_iterator.cpp
+SOURCES += main.cpp
 
 HEADERS += \
     list_map.h
