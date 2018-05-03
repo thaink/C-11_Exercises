@@ -33,19 +33,12 @@ namespace ktstd {
      * original layer.
      */
 
-using T             = std::string;
-using Key           = std::string;
-using internal_val  = typename std::pair<const Key,T>;
-using Pointer       = internal_val*;
-using Reference     = internal_val&;
-using Compare       = std::less<Key>;
 
-
-
-    //template <typename T>
+    // T = list_map::value_type = pair<const Key,T>
+    template <typename T>
     struct list_map_base {
         using this_type     = list_map_base;
-        using value_type    = internal_val;
+        using value_type    = T;
 
         //data
         value_type value; //pair of Key/Value
@@ -59,18 +52,20 @@ using Compare       = std::less<Key>;
             :value(val), Prev(nullptr), Next(nullptr) {}
     };
 
-using Allocator     = std::allocator<std::pair<const Key, list_map_base::this_type>>;
 
-    //template <typename T, typename Pointer, typename Reference>
+    // T         = list_map::value_type
+    // Pointer   = list_map::value_type*
+    // Reference = list_map::value_type&
+    template <typename T, typename Pointer, typename Reference>
     struct list_map_iterator
     {
-        using this_type         = list_map_iterator;
-        using iterator          = list_map_iterator;
-        using const_iterator    = list_map_iterator;
+        using this_type         = list_map_iterator<T,Pointer, Reference>;
+        using iterator          = list_map_iterator<T, T*, T&>;
+        using const_iterator    = list_map_iterator<T,const T*,const T&>;
         using size_type         = std::size_t;
         using difference_type   = std::ptrdiff_t;
         using value_type        = T;
-        using node_type         = typename list_map_base::this_type;
+        using node_type         = list_map_base<T>;
         using pointer           = Pointer;
         using reference         = Reference;
         using iterator_category = std::bidirectional_iterator_tag;
@@ -94,9 +89,9 @@ using Allocator     = std::allocator<std::pair<const Key, list_map_base::this_ty
 
     };
 
-    //template<class Key, class T,
-    //    class Compare = std::less<Key>,
-    //    class Allocator = std::allocator<std::pair<const Key, T>>>
+    template<class Key, class T,
+        class Compare = std::less<Key>,
+        class Allocator = std::allocator<std::pair<const Key, list_map_base<std::pair<const Key,T>>>>>
     class list_map {
 
     public:
@@ -108,11 +103,11 @@ using Allocator     = std::allocator<std::pair<const Key, list_map_base::this_ty
         using value_type                = typename std::pair<const Key,T>; //value use will see
         using reference                 = value_type&;
         using const_reference           = const value_type&;
-        using node_type                 = list_map_base::this_type; //actual value in the map
+        using node_type                 = list_map_base<value_type>; //actual value in the map
         using map_type                  = typename std::map<Key,node_type,Compare,Allocator>;
         //iterator types
-        using iterator                  = ktstd::list_map_iterator;
-        using const_iterator            = ktstd::list_map_iterator;
+        using iterator                  = ktstd::list_map_iterator<value_type,value_type*,value_type&>;
+        using const_iterator            = ktstd::list_map_iterator<value_type, const value_type*, const value_type&>;
         using reverse_iterator          = std::reverse_iterator<iterator>;
         using const_reverse_iterator    = std::reverse_iterator<const_iterator>;
         using allocator_type            = Allocator;
@@ -206,84 +201,68 @@ using Allocator     = std::allocator<std::pair<const Key, list_map_base::this_ty
     /**===============================================================
      * list_map_iterator
      =================================================================*/
-    //template <typename T, typename Pointer, typename Reference>
-    //list_map_iterator<T,Pointer,Reference>::list_map_iterator()
-    list_map_iterator::list_map_iterator()
+    template <typename T, typename Pointer, typename Reference>
+    list_map_iterator<T,Pointer,Reference>::list_map_iterator()
         :mpNode{nullptr}
     {
 
     }
 
-    //template <typename T, typename Pointer, typename Reference>
-    //list_map_iterator<T,Pointer,Reference>::list_map_iterator(const node_type* pNode)
-    list_map_iterator::list_map_iterator(const node_type* pNode)
+    template <typename T, typename Pointer, typename Reference>
+    list_map_iterator<T,Pointer,Reference>::list_map_iterator(const node_type* pNode)
         :mpNode{const_cast<node_type*>(pNode)}
     {
 
     }
 
-    //template <typename T, typename Pointer, typename Reference>
-    //list_map_iterator<T,Pointer,Reference>::list_map_iterator(const iterator& pNode)
-    list_map_iterator::list_map_iterator(const iterator& x)
-
+    template <typename T, typename Pointer, typename Reference>
+    list_map_iterator<T,Pointer,Reference>::list_map_iterator(const iterator& x)
     {
         mpNode=const_cast<node_type*>(x.mpNode);
     }
 
-    //template <typename T, typename Pointer, typename Reference>
-    //inline typename list_map_iterator<T,Pointer,Reference>::reference
-    //list_map_iterator<T,Pointer,Reference>::operator*() const
-    inline typename list_map_iterator::reference
-    list_map_iterator::operator*() const
+    template <typename T, typename Pointer, typename Reference>
+    inline typename list_map_iterator<T,Pointer,Reference>::reference
+    list_map_iterator<T,Pointer,Reference>::operator*() const
     {
-        return mpNode->value;
+        return static_cast<reference>(mpNode->value);
     }
 
-    //template <typename T, typename Pointer, typename Reference>
-    //inline typename list_map_iterator<T,Pointer,Reference>::pointer
-    //list_map_iterator<T,Pointer,Reference>::operator->() const
-    inline typename list_map_iterator::pointer
-    list_map_iterator::operator->() const
+    template <typename T, typename Pointer, typename Reference>
+    inline typename list_map_iterator<T,Pointer,Reference>::pointer
+    list_map_iterator<T,Pointer,Reference>::operator->() const
     {
-        return &(mpNode->value);
+        return static_cast<pointer>(&(mpNode->value));
     }
 
-    //template <typename T, typename Pointer, typename Reference>
-    //inline typename list_map_iterator<T,Pointer,Reference>::this_type&
-    //list_map_iterator<T,Pointer,Reference>::operator++()
-    inline typename list_map_iterator::this_type&
-    list_map_iterator::operator++()
+    template <typename T, typename Pointer, typename Reference>
+    inline typename list_map_iterator<T,Pointer,Reference>::this_type&
+    list_map_iterator<T,Pointer,Reference>::operator++()
     {
         mpNode = mpNode->Next;
         return *this;
     }
 
-    //template <typename T, typename Pointer, typename Reference>
-    //inline typename list_map_iterator<T,Pointer,Reference>::this_type
-    //list_map_iterator<T,Pointer,Reference>::operator++(int)
-    inline typename list_map_iterator::this_type
-    list_map_iterator::operator++(int)
+    template <typename T, typename Pointer, typename Reference>
+    inline typename list_map_iterator<T,Pointer,Reference>::this_type
+    list_map_iterator<T,Pointer,Reference>::operator++(int)
     {
         this_type temp{mpNode};
         mpNode = mpNode->Next;
         return temp;
     }
 
-    //template <typename T, typename Pointer, typename Reference>
-    //inline typename list_map_iterator<T,Pointer,Reference>::this_type&
-    //list_map_iterator<T,Pointer,Reference>::operator--()
-    inline typename list_map_iterator::this_type&
-    list_map_iterator::operator--()
+    template <typename T, typename Pointer, typename Reference>
+    inline typename list_map_iterator<T,Pointer,Reference>::this_type&
+    list_map_iterator<T,Pointer,Reference>::operator--()
     {
         mpNode = mpNode->Prev;
         return *this;
     }
 
-    //template <typename T, typename Pointer, typename Reference>
-    //inline typename list_map_iterator<T,Pointer,Reference>::this_type
-    //list_map_iterator<T,Pointer,Reference>::operator--(int)
-    inline typename list_map_iterator::this_type
-    list_map_iterator::operator--(int)
+    template <typename T, typename Pointer, typename Reference>
+    inline typename list_map_iterator<T,Pointer,Reference>::this_type
+    list_map_iterator<T,Pointer,Reference>::operator--(int)
     {
         this_type temp{mpNode};
         mpNode = mpNode->Prev;
@@ -291,12 +270,14 @@ using Allocator     = std::allocator<std::pair<const Key, list_map_base::this_ty
     }
 
     //We provide comparision for iterator
-    inline bool operator==(const list_map_iterator& a, const list_map_iterator& b)
+    template <typename T, typename Pointer1, typename Reference1, typename Pointer2, typename Reference2>
+    inline bool operator==(const list_map_iterator<T,Pointer1,Reference1>& a, const list_map_iterator<T,Pointer2,Reference2>& b)
     {
         return a.mpNode == b.mpNode;
     }
 
-    inline bool operator!=(const list_map_iterator& a, const list_map_iterator& b)
+    template <typename T, typename Pointer1, typename Reference1, typename Pointer2, typename Reference2>
+    inline bool operator!=(const list_map_iterator<T,Pointer1,Reference1>& a, const list_map_iterator<T,Pointer2,Reference2>& b)
     {
         return a.mpNode != b.mpNode;
     }
@@ -307,9 +288,9 @@ using Allocator     = std::allocator<std::pair<const Key, list_map_base::this_ty
      *list_map
      ===============================================================*/
     //For iterators
-    //template<class Key, class T, class Compare, class Allocator>
-    //list_map<Key, T, Compare, Allocator>::list_map(const Allocator& allocator)
-    list_map::list_map(const Allocator& allocator)
+    template<class Key, class T, class Compare, class Allocator>
+    list_map<Key, T, Compare, Allocator>::list_map(const Allocator& allocator)
+    //list_map::list_map(const Allocator& allocator)
         :mNode(),mMap(allocator)
     {
         mNode.Next = &mNode;
@@ -317,9 +298,9 @@ using Allocator     = std::allocator<std::pair<const Key, list_map_base::this_ty
     }
 
 
-    //template<class Key, class T, class Compare, class Allocator>
-    //list_map<Key, T, Compare, Allocator>::list_map(const Compare& compare, const Allocator& allocator)
-    list_map::list_map(const Compare& compare, const Allocator& allocator)
+    template<class Key, class T, class Compare, class Allocator>
+    list_map<Key, T, Compare, Allocator>::list_map(const Compare& compare, const Allocator& allocator)
+    //list_map::list_map(const Compare& compare, const Allocator& allocator)
         :mNode(),mMap(compare, allocator)
     {
         mNode.Next = &mNode;
@@ -327,141 +308,147 @@ using Allocator     = std::allocator<std::pair<const Key, list_map_base::this_ty
     }
 
 
-    //template<class Key, class T, class Compare, class Allocator>
-    //typename list_map<Key, T, Compare, Allocator>::iterator
-    //list_map<Key, T, Compare, Allocator>::begin() noexcept
-    typename list_map::iterator list_map::begin() noexcept
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::iterator
+    list_map<Key, T, Compare, Allocator>::begin() noexcept
+    //typename list_map::iterator list_map::begin() noexcept
     {
         return iterator(mNode.Next);
     }
 
-    //template<class Key, class T, class Compare, class Allocator>
-    //typename list_map<Key, T, Compare, Allocator>::const_iterator
-    //list_map<Key, T, Compare, Allocator>::begin() const noexcept
-    typename list_map::const_iterator list_map::begin() const noexcept
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::const_iterator
+    list_map<Key, T, Compare, Allocator>::begin() const noexcept
+    //typename list_map::const_iterator list_map::begin() const noexcept
     {
         return const_iterator(mNode.Next);
     }
 
 
-    //template<class Key, class T, class Compare, class Allocator>
-    //typename list_map<Key, T, Compare, Allocator>::const_iterator
-    //list_map<Key, T, Compare, Allocator>::cbegin() const noexcept
-    typename list_map::const_iterator list_map::cbegin() const noexcept
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::const_iterator
+    list_map<Key, T, Compare, Allocator>::cbegin() const noexcept
+    //typename list_map::const_iterator list_map::cbegin() const noexcept
     {
         return const_iterator(mNode.Next);
     }
 
 
-    //template<class Key, class T, class Compare, class Allocator>
-    //typename list_map<Key, T, Compare, Allocator>::iterator
-    //list_map<Key, T, Compare, Allocator>::end() noexcept
-    typename list_map::iterator list_map::end() noexcept
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::iterator
+    list_map<Key, T, Compare, Allocator>::end() noexcept
+    //typename list_map::iterator list_map::end() noexcept
     {
         return iterator(&mNode);
     }
 
 
-    //template<class Key, class T, class Compare, class Allocator>
-    //typename list_map<Key, T, Compare, Allocator>::const_iterator
-    //list_map<Key, T, Compare, Allocator>::end() const noexcept
-    typename list_map::const_iterator list_map::end() const noexcept
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::const_iterator
+    list_map<Key, T, Compare, Allocator>::end() const noexcept
+    //typename list_map::const_iterator list_map::end() const noexcept
     {
         return const_iterator(&mNode);
     }
 
 
-    //template<class Key, class T, class Compare, class Allocator>
-    //typename list_map<Key, T, Compare, Allocator>::const_iterator
-    //list_map<Key, T, Compare, Allocator>::cend() const noexcept
-    typename list_map::const_iterator list_map::cend() const noexcept
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::const_iterator
+    list_map<Key, T, Compare, Allocator>::cend() const noexcept
+    //typename list_map::const_iterator list_map::cend() const noexcept
     {
         return const_iterator(&mNode);
     }
 
 
-    //template<class Key, class T, class Compare, class Allocator>
-    //typename list_map<Key, T, Compare, Allocator>::reverse_iterator
-    //list_map<Key, T, Compare, Allocator>::rbegin() noexcept
-    typename list_map::reverse_iterator list_map::rbegin() noexcept
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::reverse_iterator
+    list_map<Key, T, Compare, Allocator>::rbegin() noexcept
+    //typename list_map::reverse_iterator list_map::rbegin() noexcept
     {
         return reverse_iterator(&mNode);
     }
 
 
-    //template<class Key, class T, class Compare, class Allocator>
-    //typename list_map<Key, T, Compare, Allocator>::const_reverse_iterator
-    //list_map<Key, T, Compare, Allocator>::rbegin() const noexcept
-    typename list_map::const_reverse_iterator list_map::rbegin() const noexcept
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::const_reverse_iterator
+    list_map<Key, T, Compare, Allocator>::rbegin() const noexcept
+    //typename list_map::const_reverse_iterator list_map::rbegin() const noexcept
     {
         return const_reverse_iterator(&mNode);
     }
 
 
-    //template<class Key, class T, class Compare, class Allocator>
-    //typename list_map<Key, T, Compare, Allocator>::const_reverse_iterator
-    //list_map<Key, T, Compare, Allocator>::crbegin() const noexcept
-    typename list_map::const_reverse_iterator list_map::crbegin() const noexcept
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::const_reverse_iterator
+    list_map<Key, T, Compare, Allocator>::crbegin() const noexcept
+    //typename list_map::const_reverse_iterator list_map::crbegin() const noexcept
     {
         return const_reverse_iterator(&mNode);
     }
 
-    //template<class Key, class T, class Compare, class Allocator>
-    //typename list_map<Key, T, Compare, Allocator>::reverse_iterator
-    //list_map<Key, T, Compare, Allocator>::rend() noexcept
-    typename list_map::reverse_iterator list_map::rend() noexcept
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::reverse_iterator
+    list_map<Key, T, Compare, Allocator>::rend() noexcept
+    //typename list_map::reverse_iterator list_map::rend() noexcept
     {
         return reverse_iterator(mNode.Next);
     }
 
 
-    //template<class Key, class T, class Compare, class Allocator>
-    //typename list_map<Key, T, Compare, Allocator>::const_reverse_iterator
-    //list_map<Key, T, Compare, Allocator>::rend() const noexcept
-    typename list_map::const_reverse_iterator list_map::rend() const noexcept
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::const_reverse_iterator
+    list_map<Key, T, Compare, Allocator>::rend() const noexcept
+    //typename list_map::const_reverse_iterator list_map::rend() const noexcept
     {
         return const_reverse_iterator(mNode.Next);
     }
 
 
-    //template<class Key, class T, class Compare, class Allocator>
-    //typename list_map<Key, T, Compare, Allocator>::const_reverse_iterator
-    //list_map<Key, T, Compare, Allocator>::crend() const noexcept
-    typename list_map::const_reverse_iterator list_map::crend() const noexcept
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::const_reverse_iterator
+    list_map<Key, T, Compare, Allocator>::crend() const noexcept
+    //typename list_map::const_reverse_iterator list_map::crend() const noexcept
     {
         return const_reverse_iterator(mNode.Next);
     }
 
 
     //For List
-    typename list_map::reference
-    list_map::front()
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::reference
+    list_map<Key, T, Compare, Allocator>::front()
     {
         return static_cast<node_type*>(mNode.Next)->value;
     }
 
 
-    typename list_map::const_reference
-    list_map::front() const
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::const_reference
+    list_map<Key, T, Compare, Allocator>::front() const
     {
         return static_cast<node_type*> (mNode.Next)->value;
     }
 
 
-    typename list_map::reference
-    list_map::back()
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::reference
+    list_map<Key, T, Compare, Allocator>::back()
     {
         return static_cast<node_type*> (mNode.Prev)->value;
     }
 
 
-    typename list_map::const_reference
-    list_map::back() const
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::const_reference
+    list_map<Key, T, Compare, Allocator>::back() const
     {
         return static_cast<node_type*> (mNode.Prev)->value;
     }
 
-    bool list_map::push_front(const value_type& value)
+
+    template<class Key, class T, class Compare, class Allocator>
+    bool list_map<Key, T, Compare, Allocator>::push_front(const value_type& value)
     {
         node_type temp(value);
         auto res = mMap.emplace(value.first, temp);
@@ -478,7 +465,9 @@ using Allocator     = std::allocator<std::pair<const Key, list_map_base::this_ty
         return false;
     }
 
-    bool list_map::push_back(const value_type& value)
+
+    template<class Key, class T, class Compare, class Allocator>
+    bool list_map<Key, T, Compare, Allocator>::push_back(const value_type& value)
     {
         node_type temp(value);
         auto res = mMap.emplace(value.first, temp);
@@ -495,17 +484,23 @@ using Allocator     = std::allocator<std::pair<const Key, list_map_base::this_ty
         return false;
     }
 
-    bool list_map::push_front(const key_type& key, const mapped_type& value)
+
+    template<class Key, class T, class Compare, class Allocator>
+    bool list_map<Key, T, Compare, Allocator>::push_front(const key_type& key, const mapped_type& value)
     {
         return push_front(std::make_pair(key, value));
     }
 
-    bool list_map::push_back(const key_type& key, const mapped_type& value)
+
+    template<class Key, class T, class Compare, class Allocator>
+    bool list_map<Key, T, Compare, Allocator>::push_back(const key_type& key, const mapped_type& value)
     {
         return push_back(std::make_pair(key, value));
     }
 
-    void list_map::pop_front()
+
+    template<class Key, class T, class Compare, class Allocator>
+    void list_map<Key, T, Compare, Allocator>::pop_front()
     {
         if(&mNode == mNode.Next) return;
 
@@ -517,7 +512,9 @@ using Allocator     = std::allocator<std::pair<const Key, list_map_base::this_ty
 
     }
 
-    void list_map::pop_back()
+
+    template<class Key, class T, class Compare, class Allocator>
+    void list_map<Key, T, Compare, Allocator>::pop_back()
     {
         if(&mNode == mNode.Prev) return;
 
@@ -529,8 +526,9 @@ using Allocator     = std::allocator<std::pair<const Key, list_map_base::this_ty
     }
 
     //For Map
-    list_map::iterator
-    list_map::find(const key_type& key)
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::iterator
+    list_map<Key, T, Compare, Allocator>::find(const key_type& key)
     {
         auto fval = mMap.find(key);
         if(fval != mMap.end())//remember mMap.end() != end()
@@ -540,8 +538,10 @@ using Allocator     = std::allocator<std::pair<const Key, list_map_base::this_ty
         return iterator(&mNode);
     }
 
-    list_map::const_iterator
-    list_map::find(const key_type& key) const
+
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::const_iterator
+    list_map<Key, T, Compare, Allocator>::find(const key_type& key) const
     {
         auto fval = mMap.find(key);
         if(fval != mMap.end())
@@ -551,9 +551,11 @@ using Allocator     = std::allocator<std::pair<const Key, list_map_base::this_ty
         return const_iterator(&mNode);
     }
 
+
+    template <typename Key, typename T, typename Compare, typename Allocator>
     template <typename U, typename Compare2>
-    list_map::iterator
-    list_map::find_as(const U& u, Compare2 compare2)
+    typename list_map<Key, T, Compare, Allocator>::iterator
+    list_map<Key, T, Compare, Allocator>::find_as(const U& u, Compare2 compare2)
     {
         for(auto idx = begin(); idx != end(); ++idx)
             if(compare2((*idx).first, u))
@@ -561,9 +563,10 @@ using Allocator     = std::allocator<std::pair<const Key, list_map_base::this_ty
         return end();
     }
 
+    template <typename Key, typename T, typename Compare, typename Allocator>
     template <typename U, typename Compare2>
-    list_map::const_iterator
-    list_map::find_as(const U& u, Compare2 compare2) const
+    typename list_map<Key, T, Compare, Allocator>::const_iterator
+    list_map<Key, T, Compare, Allocator>::find_as(const U& u, Compare2 compare2) const
     {
         for(auto idx = begin(); idx != end(); ++idx)
             if(compare2((*idx).first, u))
@@ -571,14 +574,16 @@ using Allocator     = std::allocator<std::pair<const Key, list_map_base::this_ty
         return const_iterator(end());
     }
 
-    list_map::size_type
-    list_map::count(const key_type& key) const
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::size_type
+    list_map<Key, T, Compare, Allocator>::count(const key_type& key) const
     {
         return mMap.count(key);
     }
 
-    list_map::size_type
-    list_map::erase(const key_type& key)
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::size_type
+    list_map<Key, T, Compare, Allocator>::erase(const key_type& key)
     {
         auto fval = mMap.find(key);
         if(fval != mMap.end())
@@ -595,8 +600,9 @@ using Allocator     = std::allocator<std::pair<const Key, list_map_base::this_ty
     }
 
     //comon of list and map
-    list_map::iterator
-    list_map::erase(const_iterator position)
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::iterator
+    list_map<Key, T, Compare, Allocator>::erase(const_iterator position)
     {
         auto fval = mMap.find((*position).first);
         if(fval != mMap.end())
@@ -612,27 +618,31 @@ using Allocator     = std::allocator<std::pair<const Key, list_map_base::this_ty
         return end();
     }
 
-    list_map::reverse_iterator
-    list_map::erase(const_reverse_iterator position)
+    template<class Key, class T, class Compare, class Allocator>
+    typename list_map<Key, T, Compare, Allocator>::reverse_iterator
+    list_map<Key, T, Compare, Allocator>::erase(const_reverse_iterator position)
     {
         return reverse_iterator(erase((++position).base()));
     }
 
-    void list_map::clear()
+    template<class Key, class T, class Compare, class Allocator>
+    void list_map<Key, T, Compare, Allocator>::clear()
     {
         mMap.clear();
         mNode.Next = &mNode;
         mNode.Prev = &mNode;
     }
 
-    void list_map::reset_lose_memory()
+    template<class Key, class T, class Compare, class Allocator>
+    void list_map<Key, T, Compare, Allocator>::reset_lose_memory()
     {
         mMap.clear();
         mNode.Next = &mNode;
         mNode.Prev = &mNode;
     }
 
-    bool list_map::validate() const
+    template<class Key, class T, class Compare, class Allocator>
+    bool list_map<Key, T, Compare, Allocator>::validate() const
     {
         unsigned int count{0};
         for (auto idx=begin(); idx != end(); ++idx)
@@ -649,7 +659,8 @@ using Allocator     = std::allocator<std::pair<const Key, list_map_base::this_ty
         return true;
     }
 
-    int list_map::validate_iterator(const_iterator i) const
+    template<class Key, class T, class Compare, class Allocator>
+    int list_map<Key, T, Compare, Allocator>::validate_iterator(const_iterator i) const
     {
         for(auto idx = begin(); idx != end(); ++idx)
             if(i==idx)
