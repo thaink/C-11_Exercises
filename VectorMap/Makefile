@@ -48,8 +48,12 @@ OBJECTS_DIR   = ./
 
 ####### Files
 
-SOURCES       = main.cpp 
-OBJECTS       = main.o
+SOURCES       = main.cpp \
+		test_list_map.cpp \
+		test_array.cpp 
+OBJECTS       = main.o \
+		test_list_map.o \
+		test_array.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/unix.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/linux.conf \
@@ -104,7 +108,10 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exceptions.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/yacc.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
-		VectorMap.pro list_map.h main.cpp
+		VectorMap.pro list_map.h \
+		array.h main.cpp \
+		test_list_map.cpp \
+		test_array.cpp
 QMAKE_TARGET  = VectorMap
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = VectorMap
@@ -286,8 +293,14 @@ compiler_clean:
 
 ####### Compile
 
-main.o: main.cpp list_map.h
+main.o: main.cpp array.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
+
+test_list_map.o: test_list_map.cpp list_map.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o test_list_map.o test_list_map.cpp
+
+test_array.o: test_array.cpp array.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o test_array.o test_array.cpp
 
 ####### Install
 
