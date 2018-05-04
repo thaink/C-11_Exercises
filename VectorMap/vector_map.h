@@ -214,32 +214,43 @@ namespace ktstd {
 
     vector_map::vector_map(std::initializer_list<value_type> ilist, const key_compare& compare,
                            const allocator_type& allocator)
-        :base_type(ilist,allocator), mCompare{compare}
+        :base_type(allocator), mCompare{compare}
     {
-
+        insert(ilist);
     }
 
     template <typename InputIterator>
     vector_map::vector_map(InputIterator first, InputIterator last)
-        :base_type(first,last), mCompare{Compare()}
+        :base_type(), mCompare{Compare()}
     {
-
+        insert(first,last);
     }
 
     template <typename InputIterator>
     vector_map::vector_map(InputIterator first, InputIterator last, const key_compare& compare)
-    :base_type(first,last), mCompare{compare}
+    :base_type(), mCompare{compare}
     {
-
+        insert(first,last);
     }
 
     vector_map::this_type& vector_map::operator=(const this_type& x)
     {
+        base_type::operator=(x);
         mCompare = x.mCompare;
+        return *this;
     }
 
-    vector_map::this_type& vector_map::operator=(std::initializer_list<value_type> ilist);
-    vector_map::this_type& vector_map::operator=(this_type&& x);
+    vector_map::this_type& vector_map::operator=(std::initializer_list<value_type> ilist)
+    {
+        base_type.clear();
+        insert(ilist);
+    }
+
+    vector_map::this_type& vector_map::operator=(this_type&& x)
+    {
+        mCompare = x.mCompare;
+        base_type::operator =(std::move(x));
+    }
 
 
 }//ktstd
