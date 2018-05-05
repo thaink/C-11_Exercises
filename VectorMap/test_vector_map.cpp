@@ -78,6 +78,9 @@ namespace test_vector_map {
         print_map(va_temp7, "va_temp7");
         print_map(va_temp8, "va_temp8");
 
-
+        vector_map::iterator x = va_temp7.begin();
+        (*x).first = "7";
+        (*x).second="77";
     }
 }
+

@@ -7,10 +7,12 @@ QMAKE_CXXFLAGS += -std=c++17
 
 SOURCES += main.cpp \
     test_list_map.cpp \
-    test_array.cpp
+    test_array.cpp \
+    test_vector_map.cpp
 
 HEADERS += \
     list_map.h \
     array.h \
-    vector_map.h
+    vector_map.h \
+    list_map_inherit.h
 
