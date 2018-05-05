@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <memory>
 #include <vector>
+#include <algorithm>
 
 namespace ktstd {
     using Key           = std::string;
@@ -382,7 +383,10 @@ namespace ktstd {
         return reverse_iterator(base_type::erase((++last).base(),(++first).base()));
     }
 
-    //access functions
+
+    /*==============================================
+     * vector_map access functions
+     ==============================================*/
     inline vector_map::iterator  vector_map::find(const key_type& k)
     {
         std::pair<iterator,iterator> itPair = equal_range(k);
@@ -468,24 +472,40 @@ namespace ktstd {
     template <typename U, typename BinaryPredicate>
     std::pair<vector_map::iterator, vector_map::iterator>  vector_map::equal_range(const U& u, BinaryPredicate predicate)
     {
+        iterator itLB = std::lower_bound(begin(), end(), u, mCompare);
+        if((itLB == end()) || mCompare(u,*itLB))
+            return std::pair<iterator,iterator>(itLB,itLB);
 
+        iterator itUP(itLB);
+        return std::pair<iterator,iterator>(itLB,++itUP);
     }
 
     template <typename U, typename BinaryPredicate>
     std::pair<vector_map::const_iterator, vector_map::const_iterator> vector_map::equal_range(const U& u, BinaryPredicate) const
     {
+        const_iterator itLB = std::lower_bound(begin(), end(), u, mCompare);
+        if((itLB == end()) || mCompare(u,*itLB))
+            return std::pair<const_iterator,const_iterator>(itLB,itLB);
 
+        const_iterator itUP(itLB);
+        return std::pair<const_iterator,const_iterator>(itLB,++itUP);
     }
 
 
     vector_map::mapped_type& vector_map::operator[](const key_type& k)
     {
-
+        iterator itLB(lower_bound(k));
+        if((itLB == end()) || (mCompare(k,*itLB)))
+            insert(itLB, value_type(k,mapped_type()));
+        return (*itLB).second;
     }
 
     vector_map::mapped_type& vector_map::operator[](key_type&& k)
     {
-
+        iterator itLB(lower_bound(k));
+        if((itLB == end()) || (mCompare(k,*itLB)))
+            insert(itLB, value_type(std::move(k),mapped_type()));
+        return (*itLB).second;
     }
 
 
