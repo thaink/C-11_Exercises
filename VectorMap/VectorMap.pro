@@ -14,5 +14,6 @@ HEADERS += \
     list_map.h \
     array.h \
     vector_map.h \
-    list_map_inherit.h
+    list_map_inherit.h \
+    fixed_map.h
 
