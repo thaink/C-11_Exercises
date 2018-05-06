@@ -30,103 +30,44 @@ protected:
         if(!(keyBegin < keyEnd))
             return;
 
-//        if(m_map.size() == 1) { //map is just constructed
-//            if(val == m_map.begin()->second) return;
-//            if(keyEnd < std::numeric_limits<K>::max())
-//                m_map.emplace_hint(m_map.end(), keyEnd, m_map.begin()->second);
-
-//            if(std::numeric_limits<K>::lowest() < keyBegin)
-//                m_map.emplace_hint(++(m_map.begin()), keyBegin, val);
-//            else
-//                m_map.begin()->second = val;
-
-//            return;
-//        }
-
         /*
          * Complexity analysis:
          * - Two lower_bound() method takes two O(logN)
          * - The erase() is log(N) where N is number of positions need to be deleted
+         *   This is unavoidable since we have to remove duplicated nodes.
          * - Other method take O(1)
-         * - For operator on K and V
-         *      - for V, use only two operator == (one for keyBegin and one for keyEnd)
-         *      - for K, excluding comparision inside lower_bound, use only two operator < (one for keyBegin and one for keyEnd)
          */
         using map_type      = std::map<K,V>;
         using iterator      = typename map_type::iterator;
-        using iterator_pair = std::pair<iterator,iterator>;
 
-        //insert or replace at keyBegin
-        //iterator itEndLB   = m_map.lower_bound(keyEnd);
-//        iterator_pair itEndER  = m_map.equal_range(keyEnd);
-//        iterator iEndLB(itEndER.first);
-//        V  previousVal = (--(itEndER.second))->second;
-//        if(keyEnd < std::numeric_limits<K>::max()) {
-//            if(itEndER.first == m_map.end()) {
-//                if(!(val == m_map.rbegin()->second))
-//                    iEndLB = m_map.emplace_hint(itEndER.first, keyEnd,  m_map.rbegin()->second);
-//            } else {
-//                if ((keyEnd < itEndLB->first) && (!(val == (--itEndLB)->second)))
-//                       itEndLB = m_map.emplace_hint(itEndLB, keyEnd, (--itEndLB)->second);
-//            }
-//        }
-
+        //insert keyEnd first
         iterator itEndLB = m_map.lower_bound(keyEnd);
-        iterator itEnd(itEndLB);
-        if(keyEnd < std::numeric_limits<K>::max()) {
-            itEnd = m_map.emplace_hint(itEndLB, keyEnd, (--itEndLB)->second);
-            //iterator temp(itEnd);
-            //++temp;
-            K elb = itEndLB->first;
-            K ebn = itEnd->first;
-            //itEndLB now point to the previous point of itEnd
-            ///if((temp != m_map.end()) && (itEnd->second == temp->second))
-            if(itEnd->second == val)
-                ++itEnd; //duplicated value. advance to delete
-        }
+        iterator itEnd = m_map.emplace_hint(itEndLB, keyEnd, (--itEndLB)->second);
+        if(itEnd->second == val)
+            ++itEnd; //duplicated value. advance to delete
 
+        //now insert keyBegin
         iterator itBeginLB = m_map.lower_bound(keyBegin);
         iterator itBegin;
         //following if should be replaced by insert_or_assign
+        //unfortunately, my compiler yield not found error on this function
         if(keyBegin < itBeginLB->first) {
             itBegin = m_map.emplace_hint(itBeginLB, keyBegin, val);
-            --itBeginLB;
+            --itBeginLB;//move back to be equal to itBegin
         } else {
             itBegin = itBeginLB;
             itBegin->second = val;
         }
-        //after this itBegin==itBeginLB
 
 
         if(std::numeric_limits<K>::lowest() < keyBegin) {
-            --itBeginLB;//now point to previous point of itBegin
-            K elb = itBeginLB->first;
-            K ebn = itBegin->first;
+            --itBeginLB;//itBeginLB now point to previous point of itBegin
             if(itBegin->second == itBeginLB->second)
                 --itBegin;//move back to delete
         }
 
-
-
-
-//        K ek = itEndLB->first;
-//        //insert or replace at keyBegin
-//        iterator itBeginLB = m_map.lower_bound(keyBegin);//itBeginLB != end() because we already insert keyEnd if necessary
-//        if(keyBegin < (*itBeginLB).first) {
-//            if(!(val == (--itBeginLB)->second))
-//                itBeginLB = m_map.emplace_hint(itBeginLB, keyBegin, val);
-//        } else { //replace current value
-//            if(!(val == (--itBeginLB)->second))
-//                (*itBeginLB).second = val;
-//        }
-
-        //check if whatever we did to begin. end does not change
-//        K ek2 = itEndLB->first;
-//        assert(ek == itEndLB->first);
         //erase middle node between begin and end
         if(itBegin != itEnd) {
-            K eb = itBegin->first;
-            K ee = (itEnd == m_map.end()) ? K() : itEnd->first;
             m_map.erase(++itBegin, itEnd);
         }
 
@@ -156,12 +97,11 @@ public:
 
     void test_map_validate()
     {
-        std::cout << "------------start validated  "<<  (int)m_map.size()  <<"--------\n";
+        std::cout << "------------start validated  "<<  m_map.size()  <<"--------\n";
         print_element();
         for (auto it = m_map.begin(); it != --m_map.end();++it)
         {
             auto it2(it); ++it2;
-            //std::cout << "K,V: " << (int)it->first << " " << (int)it->second << " K,V: " << (int)it2->first << " " << (int)it2->second << "\n";
             if(!(it->first < (it2)->first))
                 throw std::invalid_argument("map order broken\n");
 

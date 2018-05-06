@@ -54,7 +54,7 @@ void IntervalMapTest()
 void IntervalMapTest_random()
 {
     interval_map<KM,KV> iv(8);
-    int MAX = 20000000;
+    int MAX = 100000000;
     std::default_random_engine generator;
     std::uniform_int_distribution<KM> distribution(numeric_limits<KM>::lowest(),numeric_limits<KM>::max());
 

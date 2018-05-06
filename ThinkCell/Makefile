@@ -48,10 +48,8 @@ OBJECTS_DIR   = ./
 
 ####### Files
 
-SOURCES       = interval_map.cpp \
-		main.cpp 
-OBJECTS       = interval_map.o \
-		main.o
+SOURCES       = main.cpp 
+OBJECTS       = main.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/unix.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/linux.conf \
@@ -106,8 +104,7 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exceptions.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/yacc.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
-		ThinkCell.pro interval_map.h interval_map.cpp \
-		main.cpp
+		ThinkCell.pro interval_map.h main.cpp
 QMAKE_TARGET  = ThinkCell
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = ThinkCell
@@ -289,10 +286,7 @@ compiler_clean:
 
 ####### Compile
 
-interval_map.o: interval_map.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o interval_map.o interval_map.cpp
-
-main.o: main.cpp 
+main.o: main.cpp interval_map.cpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 ####### Install
