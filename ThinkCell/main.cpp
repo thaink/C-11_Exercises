@@ -39,11 +39,11 @@ void IntervalMapTest()
     iv.assign_and_print(7, 6, 8);
     iv.assign_and_print(6, 6, 5);
     iv.assign_and_print(4, 6, 8);
-    iv.assign_and_print(0, 6, 5);
-    iv.assign_and_print(0, numeric_limits<KM>::max(), 8);
+    iv.assign_and_print(1, 6, 5);
+    iv.assign_and_print(1, numeric_limits<KM>::max(), 8);
     iv.assign_and_print(numeric_limits<KM>::lowest(),6, 5);
     iv.assign_and_print(3, numeric_limits<KM>::max(), 45);
-    iv.assign_and_print(0, 6, 43);
+    iv.assign_and_print(1, 6, 43);
     iv.assign_and_print(5, 10, 67);
     iv.assign_and_print(10, 25, 57);
     //test_map_validate(iv);
@@ -54,7 +54,7 @@ void IntervalMapTest()
 void IntervalMapTest_random()
 {
     interval_map<KM,KV> iv(8);
-    int MAX = 200000;
+    int MAX = 20000000;
     std::default_random_engine generator;
     std::uniform_int_distribution<KM> distribution(numeric_limits<KM>::lowest(),numeric_limits<KM>::max());
 
@@ -72,8 +72,8 @@ void IntervalMapTest_random()
 
 int main()
 {
-    IntervalMapTest();
-    //IntervalMapTest_random();;
+    //IntervalMapTest();
+    IntervalMapTest_random();;
     return 0;
 }
 

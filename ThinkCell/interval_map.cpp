@@ -72,27 +72,36 @@ protected:
 //        }
 
         iterator itEndLB = m_map.lower_bound(keyEnd);
-        iterator itEnd;
+        iterator itEnd(itEndLB);
         if(keyEnd < std::numeric_limits<K>::max()) {
             itEnd = m_map.emplace_hint(itEndLB, keyEnd, (--itEndLB)->second);
+            //iterator temp(itEnd);
+            //++temp;
+            K elb = itEndLB->first;
+            K ebn = itEnd->first;
             //itEndLB now point to the previous point of itEnd
-            if(itEnd->second == itEndLB->second)
+            ///if((temp != m_map.end()) && (itEnd->second == temp->second))
+            if(itEnd->second == val)
                 ++itEnd; //duplicated value. advance to delete
         }
 
         iterator itBeginLB = m_map.lower_bound(keyBegin);
         iterator itBegin;
         //following if should be replaced by insert_or_assign
-        if(keyBegin < itBeginLB->first)
+        if(keyBegin < itBeginLB->first) {
             itBegin = m_map.emplace_hint(itBeginLB, keyBegin, val);
-        else {
+            --itBeginLB;
+        } else {
             itBegin = itBeginLB;
             itBegin->second = val;
         }
+        //after this itBegin==itBeginLB
 
 
         if(std::numeric_limits<K>::lowest() < keyBegin) {
             --itBeginLB;//now point to previous point of itBegin
+            K elb = itBeginLB->first;
+            K ebn = itBegin->first;
             if(itBegin->second == itBeginLB->second)
                 --itBegin;//move back to delete
         }
@@ -116,8 +125,8 @@ protected:
 //        assert(ek == itEndLB->first);
         //erase middle node between begin and end
         if(itBegin != itEnd) {
-            //K eb = itBegin->first;
-            //K ee = itEnd->first;
+            K eb = itBegin->first;
+            K ee = (itEnd == m_map.end()) ? K() : itEnd->first;
             m_map.erase(++itBegin, itEnd);
         }
 
@@ -139,19 +148,20 @@ public:
 
     void print_element()
     {
-        std::cout << "--------print-------\n";
+        //std::cout << "--------print-------\n";
         for (auto x:m_map)
             std::cout << (int)x.first << " " << (int)x.second << "\n";
-        std::cout << "--------done--------\n";
+        //::cout << "--------done--------\n";
     }
 
     void test_map_validate()
     {
         std::cout << "------------start validated  "<<  (int)m_map.size()  <<"--------\n";
+        print_element();
         for (auto it = m_map.begin(); it != --m_map.end();++it)
         {
             auto it2(it); ++it2;
-            std::cout << "K,V: " << (int)it->first << " " << (int)it->second << " K,V: " << (int)it2->first << " " << (int)it2->second << "\n";
+            //std::cout << "K,V: " << (int)it->first << " " << (int)it->second << " K,V: " << (int)it2->first << " " << (int)it2->second << "\n";
             if(!(it->first < (it2)->first))
                 throw std::invalid_argument("map order broken\n");
 
