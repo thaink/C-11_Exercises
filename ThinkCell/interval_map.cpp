@@ -6,7 +6,7 @@ template<class K, class V>
 class interval_map {
     friend void IntervalMapTest();
 
-private:
+public:
     std::map<K,V> m_map;
 
 public:
@@ -24,7 +24,52 @@ public:
     // If !( keyBegin < keyEnd ), this designates an empty interval, 
     // and assign must do nothing.
     void assign( K const& keyBegin, K const& keyEnd, V const& val ) {
-// INSERT YOUR SOLUTION HERE
+        //checking for simple cases
+        if(!(keyBegin < keyEnd))
+                return;
+
+        if((m_map.size() == 1) && !(val == m_map.begin()->second)) { //map is just constructed
+            if(keyEnd < std::numeric_limits<K>::max())
+                m_map.emplace_hint(m_map.end(), keyEnd, m_map.begin()->second);
+
+            if(std::numeric_limits<K>::lowest() < keyBegin)
+                m_map.emplace_hint(m_map.begin(), keyBegin, val);
+            return;
+        }
+
+        /*
+         * Complexity analysis:
+         * - Two lower_bound() method takes two O(logN)
+         * - The erase() is log(N) where N is number of positions need to be deleted
+         * - Other method take O(1)
+         * - For operator on K and V
+         *      - for V, use only two operator == (one for keyBegin and one for keyEnd)
+         *      - for K, excluding comparision inside lower_bound, use only two operator < (one for keyBegin and one for keyEnd)
+         */
+        using map_type = std::map<K,V>;
+        using iterator = typename map_type::iterator;
+
+        //insert or replace at keyBegin
+        iterator itEndLB   = m_map.lower_bound(keyEnd);
+        if(itEndLB == m_map.end()) {
+            if((keyEnd < std::numeric_limits<K>::max()) && !(val == m_map.rbegin()->second))
+                itEndLB = m_map.emplace_hint(itEndLB, keyEnd,  m_map.rbegin()->second);
+        } else {
+            if ((keyEnd < itEndLB->first) && (!(val == (--itEndLB)->second)))
+                   itEndLB = m_map.emplace_hint(itEndLB, keyEnd, (--itEndLB)->second);
+        }
+
+        //insert or replace at keyBegin
+        iterator itBeginLB = m_map.lower_bound(keyBegin);//itBeginLB != end() because we already insert keyEnd if necessary
+        if(keyBegin < (*itBeginLB).first) {
+            if(!(val == (--itBeginLB)->second))
+                itBeginLB = m_map.emplace_hint(itBeginLB, keyBegin, val);
+        } else { //replace current value
+            (*itBeginLB).second = val;
+        }
+
+        //erase middle node between begin and end
+        m_map.erase(++itBeginLB, itEndLB);
     }
 
     // look-up of the value associated with key
@@ -38,7 +83,3 @@ public:
 // We recommend to implement a function IntervalMapTest() here that tests the
 // functionality of the interval_map, for example using a map of unsigned int
 // intervals to char.
-
-int main() {
-    IntervalMapTest();
-}
