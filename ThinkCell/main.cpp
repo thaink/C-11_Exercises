@@ -16,7 +16,7 @@ void test_map_validate(const interval_map<KM,KV>& iv)
         if(!(it->first < (it2)->first))
             std::cerr << "map order broken\n";
 
-        if(!(it->second == (it2)->second))
+        if((it->second == it2->second))
             std::cerr << "map duplicate value exist\n";
     }
 
@@ -42,6 +42,9 @@ void IntervalMapTest()
     iv.assign(0, numeric_limits<KM>::max(), 8);
     iv.assign(numeric_limits<KM>::lowest(),6, 5);
     iv.assign(3, numeric_limits<KM>::max(), 45);
+    iv.assign(0, 6, 43);
+    iv.assign(5, 10, 67);
+    iv.assign(10, 25, 57);
     test_map_validate(iv);
 
     cout << "done testing!\n";
