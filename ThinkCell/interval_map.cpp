@@ -27,8 +27,10 @@ public:
     void assign( K const& keyBegin, K const& keyEnd, V const& val ) {
         std::cout << "---insert--- " << keyBegin << " " << keyEnd << " " << val << "\n";
         //checking for simple cases
-        if(!(keyBegin < keyEnd))
-                return;
+        if(!(keyBegin < keyEnd)) {
+            print_element();
+            return;
+        }
 
         if((m_map.size() == 1) && !(val == m_map.begin()->second)) { //map is just constructed
             if(keyEnd < std::numeric_limits<K>::max())
@@ -36,6 +38,10 @@ public:
 
             if(std::numeric_limits<K>::lowest() < keyBegin)
                 m_map.emplace_hint(m_map.begin(), keyBegin, val);
+            else
+                m_map.begin()->second = val;
+
+            print_element();
             return;
         }
 
@@ -72,11 +78,21 @@ public:
 
         //erase middle node between begin and end
         m_map.erase(++itBeginLB, itEndLB);
+
+        print_element();
     }
 
     // look-up of the value associated with key
     V const& operator[]( K const& key ) const {
         return ( --m_map.upper_bound(key) )->second;
+    }
+
+    void print_element()
+    {
+        std::cout << "--------print-------\n";
+        for (auto x:m_map)
+            std::cout << x.first << " " << x.second << "\n";
+        std::cout << "--------done--------\n";
     }
 };
 
