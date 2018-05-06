@@ -5,5 +5,9 @@ CONFIG -= qt
 
 QMAKE_CXXFLAGS += -std=c++17
 
-SOURCES += main.cpp
+SOURCES += \
+    interval_map.cpp
+
+HEADERS += \
+    interval_map.h
 
