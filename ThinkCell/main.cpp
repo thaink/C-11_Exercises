@@ -1,10 +1,11 @@
 #include <iostream>
+#include <random>
 #include "interval_map.cpp"
 
 using namespace std;
 
-using KM = unsigned int;
-using KV = int;
+using KM = unsigned char;
+using KV = int8_t;
 
 void test_map_validate(const interval_map<KM,KV>& iv)
 {
@@ -12,7 +13,7 @@ void test_map_validate(const interval_map<KM,KV>& iv)
     for (auto it = iv.m_map.begin(); it != --iv.m_map.end();++it)
     {
         auto it2(it); ++it2;
-        cout << "K,V: " << it->first << " " << it->second << " K,V: " << it2->first << " " << it2->second << "\n";
+        cout << "K,V: " << (int)it->first << " " << (int)it->second << " K,V: " << (int)it2->first << " " << (int)it2->second << "\n";
         if(!(it->first < (it2)->first))
             std::cerr << "map order broken\n";
 
@@ -53,11 +54,25 @@ void IntervalMapTest()
 void IntervalMapTest_random()
 {
     interval_map<KM,KV> iv(8);
+    int MAX = 20;
+    std::default_random_engine generator;
+    std::uniform_int_distribution<KM> distribution(numeric_limits<KM>::lowest(),numeric_limits<KM>::max());
+
+    std::default_random_engine generator2;
+    std::uniform_int_distribution<KV> distribution2(numeric_limits<KV>::lowest(),numeric_limits<KV>::max());
+
+    for (int i = 1; i < MAX; ++i) {
+        KM dbegin = distribution(generator);
+        KM dend   = distribution(generator);
+        KV val    = distribution2(generator2);
+        iv.assign(dbegin,dend,val);
+    }
+    test_map_validate(iv);
 }
 
 int main()
 {
-    IntervalMapTest();
+    IntervalMapTest_random();;
     return 0;
 }
 

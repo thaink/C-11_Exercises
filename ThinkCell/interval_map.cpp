@@ -25,7 +25,7 @@ public:
     // If !( keyBegin < keyEnd ), this designates an empty interval, 
     // and assign must do nothing.
     void assign( K const& keyBegin, K const& keyEnd, V const& val ) {
-        std::cout << "---insert--- " << keyBegin << " " << keyEnd << " " << val << "\n";
+        std::cout << "---insert--- " << (int)keyBegin << " " << (int)keyEnd << " " << (int)val << "\n";
         //checking for simple cases
         if(!(keyBegin < keyEnd)) {
             print_element();
@@ -91,7 +91,7 @@ public:
     {
         std::cout << "--------print-------\n";
         for (auto x:m_map)
-            std::cout << x.first << " " << x.second << "\n";
+            std::cout << (int)x.first << " " << (int)x.second << "\n";
         std::cout << "--------done--------\n";
     }
 };
