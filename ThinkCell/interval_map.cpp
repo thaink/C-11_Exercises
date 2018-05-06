@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <map>
 #include <limits>
+#include <iostream>
 
 template<class K, class V>
 class interval_map {
@@ -24,6 +25,7 @@ public:
     // If !( keyBegin < keyEnd ), this designates an empty interval, 
     // and assign must do nothing.
     void assign( K const& keyBegin, K const& keyEnd, V const& val ) {
+        std::cout << "---insert--- " << keyBegin << " " << keyEnd << " " << val << "\n";
         //checking for simple cases
         if(!(keyBegin < keyEnd))
                 return;
