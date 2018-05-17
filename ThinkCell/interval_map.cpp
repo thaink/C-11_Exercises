@@ -42,29 +42,47 @@ protected:
 
         //insert keyEnd first
         iterator itEndLB = m_map.lower_bound(keyEnd);
-        iterator itEnd = m_map.emplace_hint(itEndLB, keyEnd, (--itEndLB)->second);
-        if(itEnd->second == val)
-            ++itEnd; //duplicated value. advance to delete
+        iterator itEnd(itEndLB);
+        --itEndLB;//to previous node
+        if(keyEnd < itEndLB->first) {
+            if(!(itEndLB->second == val))
+                itEnd = m_map.emplace_hint(itEndLB, keyEnd, (itEndLB)->second);
+        } else {
+            if(itEndLB->second == val)
+                ++itEnd;
+
+        }
+//        iterator itEnd = m_map.emplace_hint(itEndLB, keyEnd, (--itEndLB)->second);
+//        if(itEnd->second == val)
+//            ++itEnd; //duplicated value. advance to delete
 
         //now insert keyBegin
         iterator itBeginLB = m_map.lower_bound(keyBegin);
-        iterator itBegin;
+        iterator itBegin(itBeginLB);
         //following if should be replaced by insert_or_assign
         //unfortunately, my compiler yield not found error on this function
         if(keyBegin < itBeginLB->first) {
-            itBegin = m_map.emplace_hint(itBeginLB, keyBegin, val);
-            --itBeginLB;//move back to be equal to itBegin
+            --itBeginLB;//move back to previous node
+            if(!(val == itBeginLB->second))
+                itBegin = m_map.emplace_hint(itBeginLB, keyBegin, val);
+            else
+                --itBegin;
+
         } else {
-            itBegin = itBeginLB;
             itBegin->second = val;
+            if(itBegin != m_map.begin()) {
+                --itBeginLB;//itBeginLB now point to previous point of itBegin
+                if(val == itBeginLB->second)
+                    --itBegin;//move back to delete
+            }
         }
 
 
-        if(std::numeric_limits<K>::lowest() < keyBegin) {
-            --itBeginLB;//itBeginLB now point to previous point of itBegin
-            if(itBegin->second == itBeginLB->second)
-                --itBegin;//move back to delete
-        }
+//        if(itBegin != m_map.begin()) {//std::numeric_limits<K>::lowest() < keyBegin
+//            --itBeginLB;//itBeginLB now point to previous point of itBegin
+//            if(itBegin->second == itBeginLB->second)
+//                --itBegin;//move back to delete
+//        }
 
         //erase middle node between begin and end
         if(itBegin != itEnd) {

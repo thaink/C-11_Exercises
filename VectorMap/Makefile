@@ -114,7 +114,9 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		array.h \
 		vector_map.h \
 		list_map_inherit.h \
-		fixed_map.h main.cpp \
+		fixed_map.h \
+		binary_search.h \
+		algo.h main.cpp \
 		test_list_map.cpp \
 		test_array.cpp \
 		test_vector_map.cpp
@@ -299,7 +301,7 @@ compiler_clean:
 
 ####### Compile
 
-main.o: main.cpp 
+main.o: main.cpp algo.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 test_list_map.o: test_list_map.cpp list_map.h

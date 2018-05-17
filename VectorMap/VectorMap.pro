@@ -15,5 +15,7 @@ HEADERS += \
     array.h \
     vector_map.h \
     list_map_inherit.h \
-    fixed_map.h
+    fixed_map.h \
+    binary_search.h \
+    algo.h
 

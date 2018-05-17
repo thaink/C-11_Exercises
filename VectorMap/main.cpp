@@ -1,13 +1,18 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
+#include "algo.h"
+
 using namespace std;
 
 
 
 int main()
 {
-    vector<pair<int,int>> x{{3,3}};
-    int y(7.0);
+    vector<int> vec={1,2,4,5,8};
+    vector<int>::iterator it = Estd::upper_bound(vec.begin(), vec.end(), 3);
+    auto res = Estd::equal_range(vec.begin(), vec.end(), 9);
+    cout << (res.first == res.second) << endl;
     return 0;
 }
 
