@@ -104,6 +104,32 @@ ForwardIter upper_bound(ForwardIter begin_, ForwardIter end_, const T& val, Comp
     return begin_;
 }
 
+template <class ForwardIter, class Comp = std::less<>>
+ForwardIter partition(ForwardIter first, ForwardIter last, Comp comp = {})
+{
+    if(first == last) return last;
+    ForwardIter it(--last);
+
+    while(first != last) {
+        if(comp(*first,*it)) {++first; continue;}
+        if(!comp(*last,*it)) {--last; continue;}
+        std::swap(*first, *last); ++first;
+    }
+    return first;
+}
+
+template <class ForwardIter, class Comp = std::less<>>
+void sort(ForwardIter first, ForwardIter last, Comp comp = {})
+{
+    if(first == last) return;
+
+    ForwardIter m = Estd::partition(first, last, comp);
+    Estd::sort(first, m, comp);
+    Estd::sort(++m, last, comp);
+}
+
+
+
 
 }//Estd
 
