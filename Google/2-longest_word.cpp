@@ -32,62 +32,52 @@
  */
 
 #include <iostream>
-#include <map>
 #include <vector>
-#include <algorithm>
+#include <map>
 
 using namespace std;
 
 class Problem {
-private:
-    string S_;
-    map<char, vector<int>> data_;
-
+    using map_type = multimap<char,pair<string, int>>;
 public:
-    Problem(string S) {
-        S_ = S;
-        for (int it= 0; it < S.size(); ++it)
-            if (data_.find(S[it]) == data_.end())
-                data_[S[it]] = vector<int> {it};
-            else
-                data_[S[it]].push_back(it);
-    }
-
-    string find_longest_word(vector<string> words) {
-        int max_length = 0;
-        string max_string = "";
-        for(auto word : words) {
-            if(is_substr(word) && (word.size() > max_length)) {
-                max_length = word.size();
-                max_string = word;
+    string solve(const string& S, const vector<string>& D) {
+        map_type dmap = gen_map(D);
+        string maxstring;
+        for (char c : S) {
+            auto fl = dmap.equal_range(c);
+            for(map_type::iterator it = fl.first, it_next = fl.first; it != fl.second; it = it_next) {
+                pair<string, int>& value = it->second;
+                value.second++;
+                it_next++;
+                if(value.second == value.first.size()) {
+                    if(value.first.size() > maxstring.size()) maxstring = value.first;
+                    dmap.erase(it);
+                    continue;
+                }
+                if(value.first[value.second] != c) {
+                    dmap.emplace(value.first[value.second], std::move(value));
+                    dmap.erase(it);
+                }
             }
         }
-        return max_string;
+    return maxstring;
     }
 
-    bool is_substr(string word) {
-        int pos = -1;
-        for (char ch : word) {
-            if(data_.find(ch) == data_.end())
-                return false;
-            else {
-                vector<int> vec = data_[ch];
-                auto newpos = std::upper_bound(vec.begin(), vec.end(), pos);
-                if(newpos == vec.end())
-                    return false;
-                else
-                    pos = *newpos;
-            }
+private:
+    map_type gen_map(const vector<string>& D) {
+        map_type mmap;
+        for (string s : D) {// s is a new copy of the original string
+            if(s.empty()) continue;
+            mmap.emplace(s[0], make_pair(s, 0));
         }
-        return true;
+        return mmap;
     }
 };
 
+
 int main()
 {
-    Problem pro("abppplee");
-    vector<string> D = {"able", "ale", "apple", "bale", "kangaroo"};
-    cout << pro.find_longest_word(D) << endl;
+    Problem pb;
+    cout << pb.solve("abppplee", {"able", "ale", "apple", "bale", "kangaroo"}) << endl;
     return 0;
 }
-

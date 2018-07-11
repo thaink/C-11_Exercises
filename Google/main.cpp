@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+=======
 /** Longest word:
  * Given a string S and a set of words D, find the longest word in D that is a subsequence of S.
  * Word W is a subsequence of S if some number of characters, possibly zero,
@@ -31,6 +33,7 @@
  *
  */
 
+>>>>>>> 1ce0f2f3248fa33199e0ef467e3fa1d022b0ab00
 #include <iostream>
 #include <map>
 #include <vector>

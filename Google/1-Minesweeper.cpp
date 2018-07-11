@@ -16,100 +16,70 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <cassert>
 
 
 using namespace std;
 
 template<typename T>
 class Matrix {
-public:
-  void resize(int rows, int cols) {
-      data_.resize(rows*cols);
-      ncols = cols;
-      nrows = rows;
-  }
-
-  T& at(int row, int col) {
-    return data_.at(row * ncols + col);
-  }
-
-  int rows() {return nrows;}
-  int cols() {return ncols;}
-
 private:
-  vector<T> data_;
-  unsigned int ncols;
-  unsigned int nrows;
+    vector<T> data_;
+    unsigned int nrows;
+    unsigned int ncols;
+
+public:
+    void resize(int rows, int cols) {
+        nrows = rows; ncols = cols;
+        data_.resize(rows*cols);
+    }
+
+    T& at(int row, int col) {return data_.at(row*ncols +  col);}
+
+    int rows() {return nrows;}
+    int cols() {return ncols;}
 };
 
-constexpr unsigned int kMine = 9;
-using std::min;
-using std::max;
+static constexpr int kMine = 9;
 
 class MineField {
 private:
     struct Cell {
+        bool visibility = 0;
         int value = 0;
-        bool visability = false;
     };
-    Matrix<Cell> mField_;
+    Matrix<Cell> data_;
 
-    void place_mine(int rrow, int rcol) {
-        if(mField_.at(rrow, rcol).value == kMine) return;
-        mField_.at(rrow, rcol).value = kMine;
-
-        int rows = mField_.rows();
-        int cols = mField_.cols();
-        for (int idx = max(0, rrow-1); idx <= min(rows-1, rrow+1); ++idx)
-            for (int jdx = max(0, rcol-1); jdx <= min(cols-1, rcol+1); ++jdx)
-                if(mField_.at(idx, jdx).value != kMine)
-                    mField_.at(idx, jdx).value++;
+    void place_mine(int row, int col) {
+        Cell& c = data_.at(row, col);
+        if(c.value == kMine) return;
+        c.value = kMine;
+        for (int idx = max(0, row-1); idx <= min(data_.rows()-1, row+1); ++idx)
+            for (int jdx = max(0, col-1); jdx <= min(data_.cols()-1, col+1); ++jdx)
+                if(data_.at(idx, jdx).value != kMine) data_.at(idx, jdx).value++;
     }
 
 public:
     MineField(int rows, int cols, int nmines) {
-        mField_.resize(rows, cols);
-
-        if(nmines > rows*cols) throw 20;
-        int mine_count = 0;
-        while (mine_count < nmines) {
-            int rcol = rand() % cols;
-            int rrow = rand() % rows;
-
-            if(mField_.at(rrow, rcol).value == kMine) continue;
-            mine_count++;
-            place_mine(rrow, rcol);
-        }
-    }
-
-    MineField(int rows, int cols, int nmines, bool op) {
-        mField_.resize(rows, cols);
-
-        if(nmines > rows*cols) throw 20;
-
-        //loop through position vector
-        std::random_device rd;
-        std::default_random_engine re(rd());
-        std::uniform_real_distribution<double> real_dist(0.0,1.0);
-
-        double mine_remain_count = nmines;
-        double position_remain_count = cols*rows;
-        for (int idx = 0; idx<cols*rows; ++idx) {
-            double posibility = mine_remain_count/position_remain_count;
-            double rand_post  = real_dist(re);
-            if (rand_post < posibility) {
+        assert(nmines <= rows*cols);
+        data_.resize(rows, cols);
+        double remaining_mine = nmines;
+        random_device rd;
+        default_random_engine re(rd());
+        uniform_real_distribution<double> urd(0.0, 1.0);
+        for (int idx = 0; idx < rows*cols; ++idx) {
+            double chance = remaining_mine/(rows*cols -idx);
+            if(urd(re) < chance) {
                 place_mine(idx/cols, idx%cols);
-                --mine_remain_count;
+                --remaining_mine ;
             }
-
-            --position_remain_count;
         }
     }
 
     void print() {
-        for (int idx = 0; idx < mField_.rows(); ++idx) {
-            for (int jdx = 0; jdx < mField_.cols(); ++jdx)
-                std::cout << mField_.at(idx, jdx).value << " ";
+        for (int idx = 0; idx < data_.rows(); ++idx) {
+            for (int jdx = 0; jdx < data_.cols(); ++jdx)
+                std::cout << data_.at(idx, jdx).value << " ";
              cout << "\n";
         }
     }
@@ -117,8 +87,7 @@ public:
 
 int main()
 {
-    MineField m(9,9,12,true);
+    MineField m(1,2,1);
     m.print();
     return 0;
 }
-
